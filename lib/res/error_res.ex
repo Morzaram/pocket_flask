@@ -1,10 +1,5 @@
-# {
-#   "code": 400,
-#   "message": "Something went wrong while processing your request. Invalid filter.",
-#   "data": {}
-# }
-
 defmodule Res.Error do
+  @derive Nestru.Decoder
   defstruct [
     :code,
     :message,

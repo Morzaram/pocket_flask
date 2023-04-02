@@ -2,22 +2,13 @@ defmodule PocketFlask.GetOne do
   alias Options.OneOpts
   import PocketFlask
 
+  def url(collection, id), do: "#{collection}/records/#{id}"
+
   def get_one(collection_name, id, opts \\ %OneOpts{}) do
-    case Req.get(get_one_url(collection_name, id)) do
-      {:ok, %{status: 200} = res} -> {:ok, struct(Res.GetOneRes, Map.from_struct(res))}
-      {:ok, res} -> {:ok, struct(Res.ErrorRes, Map.from_struct(res))}
-      {:error, err} -> {:error, err}
-    end
+    rest_req(opts) |> Req.get(url: url(collection_name, id)) |> handle_response(Res.GetOneRes)
   end
 
   def get_one!(collection_name, id, opts \\ %OneOpts{}) do
-    case Req.get!(get_one_url(collection_name, id)) do
-      %{status: 200} = res -> struct(Res.GetOneRes, Map.from_struct(res))
-      res -> struct(Res.ErrorRes, Map.from_struct(res))
-    end
-  end
-
-  defp get_one_url(collection_name, id, opts \\ %OneOpts{}) do
-    "#{rest_url()}/collections/#{collection_name}/records/#{id}"
+    rest_req(opts) |> Req.get!(url: url(collection_name, id)) |> handle_response(Res.GetOneRes)
   end
 end

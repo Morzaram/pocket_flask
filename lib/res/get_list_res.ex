@@ -1,17 +1,18 @@
 defmodule Res.GetListBody do
+  @derive Nestru.Decoder
   defstruct [
     :page,
-    :perPage,
-    :totalPages,
-    :totalItems,
+    :per_page,
+    :total_pages,
+    :total_items,
     :items
   ]
 
   @type t :: %__MODULE__{
           page: integer(),
-          perPage: integer(),
-          totalPages: integer(),
-          totalItems: integer(),
+          per_page: integer(),
+          total_pages: integer(),
+          total_items: integer(),
           items: list(map())
         }
 end

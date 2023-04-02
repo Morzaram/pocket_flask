@@ -22,3 +22,5 @@ be found at <https://hexdocs.pm/pocket_flask>.
 Version 1 - Fetch Only
 
 - []
+
+-- continue off of get_list

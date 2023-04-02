@@ -1,4 +1,5 @@
 defmodule Res.DeleteRes do
+  @derive Nestru.Decoder
   defstruct [
     :status,
     :headers,

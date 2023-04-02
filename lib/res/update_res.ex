@@ -1,4 +1,5 @@
 defmodule Res.UpdateRes do
+  @derive Nestru.Decoder
   defstruct [
     :status,
     :headers,
