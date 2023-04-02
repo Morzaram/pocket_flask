@@ -20,17 +20,17 @@ defmodule PocketFlask do
 
   def rest_url, do: Application.fetch_env!(:pocket_flask, :rest_url)
 
-  @spec rest_req(struct) :: Req.Request.t()
+  @spec rest_req(struct() | map()) :: Req.Request.t()
   def rest_req(params \\ %{}) do
     params = if is_struct(params), do: purge_unused_params(params), else: []
 
     Req.new(
       base_url: "#{rest_url()}/collections/",
-      params: params,
-      cache: true
+      params: params
     )
   end
 
+  @spec purge_unused_params(struct()) :: list()
   def purge_unused_params(opts) do
     opts
     |> Map.from_struct()
@@ -38,7 +38,6 @@ defmodule PocketFlask do
     |> Enum.filter(fn {_, v} -> v != nil end)
   end
 
-  @spec handle_response(any, struct) :: {:ok, struct} | {:error, any}
   def handle_response(res, struct) when is_tuple(res) do
     case res do
       {:ok, %{status: 200} = res} -> {:ok, snaked_struct(struct, res)}
