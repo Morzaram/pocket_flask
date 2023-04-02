@@ -26,7 +26,8 @@ defmodule PocketFlask do
 
     Req.new(
       base_url: "#{rest_url()}/collections/",
-      params: params
+      params: params,
+      max_retries: Application.fetch_env!(:pocket_flask, :retry_count)
     )
   end
 
