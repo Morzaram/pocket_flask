@@ -14,20 +14,20 @@ defmodule PocketFlask do
   defdelegate delete(collection_name, id), to: PocketFlask.Delete
   defdelegate delete!(collection_name, id), to: PocketFlask.Delete
 
+  @max_retries Application.compile_env(:pocket_flask, :retry_count)
+  @base_url Application.compile_env(:pocket_flask, :rest_url)
   @doc """
   Documentation for `RestUrl`.
   """
-
-  def rest_url, do: Application.fetch_env!(:pocket_flask, :rest_url)
 
   @spec rest_req(struct() | map()) :: Req.Request.t()
   def rest_req(params \\ %{}) do
     params = if is_struct(params), do: purge_unused_params(params), else: []
 
     Req.new(
-      base_url: "#{rest_url()}/collections/",
+      base_url: "#{@base_url}/collections/",
       params: params,
-      max_retries: Application.fetch_env!(:pocket_flask, :retry_count)
+      max_retries: @max_retries
     )
   end
 
