@@ -2,17 +2,17 @@ defmodule DeleteTest do
   use ExUnit.Case, async: true
 
   setup do
-    [record_id: create_record["id"]]
+    [record_id: create_record()["id"]]
   end
 
   test "delete/2 works", context do
-    {:ok, res} = PocketFlask.delete("posts", context[:record_id]) |> dbg
+    {:ok, res} = PocketFlask.delete("posts", context[:record_id])
     assert res.status == 204
     assert res.body == ""
   end
 
   test "delete!/2 works", context do
-    res = PocketFlask.delete!("posts", context[:record_id]) |> dbg
+    res = PocketFlask.delete!("posts", context[:record_id])
     assert res.status == 204
     assert res.body == ""
   end
