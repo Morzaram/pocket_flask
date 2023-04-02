@@ -3,13 +3,18 @@ defmodule PocketFlask.GetList do
   import PocketFlask
 
   def get_list(collection_name, opts \\ %ListOpts{}) do
-    {:ok, res} = Req.get(get_list_url(collection_name))
-    {:ok, struct(Res.GetListRes, Map.from_struct(res))}
+    case Req.get(get_list_url(collection_name)) do
+      {:ok, %{status: 200} = res} -> {:ok, struct(Res.GetListRes, Map.from_struct(res))}
+      {:ok, res} -> {:ok, struct(Res.ErrorRes, Map.from_struct(res))}
+      {:error, err} -> {:error, err}
+    end
   end
 
   def get_list!(collection_name, opts \\ %ListOpts{}) do
-    res = Req.get!(get_list_url(collection_name))
-    struct(Res.GetListRes, Map.from_struct(res))
+    case Req.get!(get_list_url(collection_name)) do
+      %{status: 200} = res -> struct(Res.GetListRes, Map.from_struct(res))
+      res -> struct(Res.ErrorRes, Map.from_struct(res))
+    end
   end
 
   defp get_list_url(collection_name) do
