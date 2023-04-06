@@ -1,10 +1,5 @@
 defmodule PocketBaseInstaller do
   def download_and_run_pocketbase(force \\ false) do
-    # remove zip if exists
-    if File.exists?("pocketbase_*.zip") do
-      File.rm("pocketbase_*.zip")
-    end
-
     if !File.exists?("pocketbase") || force do
       os = :os.type()
 
@@ -37,6 +32,11 @@ defmodule PocketBaseInstaller do
       System.cmd("mv", ["pocketbase_install/pocketbase", "."])
       # Remove the pocketbase_install folder
       File.rm_rf("pocketbase_install")
+
+      File.rm(
+        File.ls!(".")
+        |> Enum.filter(fn file -> String.starts_with?(file, "pocketbase_") end)
+      )
     end
   end
 end
