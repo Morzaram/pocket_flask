@@ -10,15 +10,27 @@ defmodule PocketFlask do
   defdelegate create!(collection_name, data, item_struct, opts \\ %CreateOpts{}),
     to: PocketFlask.Create
 
-  defdelegate get_list(collection_name, item_struct, opts \\ %ListOpts{}), to: PocketFlask.GetList
+  defdelegate get_list(collection_name, opts \\ %ListOpts{}), to: PocketFlask.GetList
 
-  defdelegate get_list!(collection_name, item_struct, opts \\ %ListOpts{}),
+  defdelegate get_list!(collection_name, opts \\ %ListOpts{}),
     to: PocketFlask.GetList
 
-  defdelegate get_one(collection_name, id, item_struct, opts \\ %OneOpts{}),
+  defdelegate get_struct_list(collection_name, item_struct, opts \\ %ListOpts{}),
+    to: PocketFlask.GetList
+
+  defdelegate get_struct_list!(collection_name, item_struct, opts \\ %ListOpts{}),
+    to: PocketFlask.GetList
+
+  defdelegate get_one(collection_name, id, opts \\ %OneOpts{}),
     to: PocketFlask.GetOne
 
-  defdelegate get_one!(collection_name, id, item_struct, opts \\ %OneOpts{}),
+  defdelegate get_one!(collection_name, id, opts \\ %OneOpts{}),
+    to: PocketFlask.GetOne
+
+  defdelegate get_struct_one(collection_name, id, item_struct, opts \\ %OneOpts{}),
+    to: PocketFlask.GetOne
+
+  defdelegate get_struct_one!(collection_name, id, item_struct, opts \\ %OneOpts{}),
     to: PocketFlask.GetOne
 
   defdelegate update(collection_name, id, data, opts \\ %UpdateOpts{}), to: PocketFlask.Update
@@ -35,12 +47,19 @@ defmodule PocketFlask do
   Documentation for `RestUrl`.
   """
 
-  @spec rest_req(struct() | map()) :: Req.Request.t()
+  @spec rest_req(map()) :: Req.Request.t()
   def rest_req(params \\ %{}) do
-    params = if is_struct(params), do: purge_unused_params(params), else: []
+    params =
+      cond do
+        is_struct(params) -> Map.from_struct(params)
+        true -> params
+      end
+
+    {form, params} = Map.split(params, [:filter])
 
     Req.new(
       base_url: "#{@base_url}/collections/",
+      form: form,
       params: params,
       max_retries: @max_retries
     )
@@ -74,6 +93,12 @@ defmodule PocketFlask do
     end
   end
 
+  @spec structure_items(tuple(), struct()) :: tuple()
+  def structure_items({status, res}, item_struct) do
+    {status, structure_items(res, item_struct)}
+  end
+
+  @spec structure_items(struct(), any) :: struct()
   def structure_items(res, item_struct) do
     res
     |> Map.replace_lazy(:body, fn body ->
@@ -94,6 +119,10 @@ defmodule PocketFlask do
 
   def body_only(res) do
     Map.get(res, :body)
+  end
+
+  def items_only({:ok, res}) do
+    items_only(res)
   end
 
   def items_only(res) do
