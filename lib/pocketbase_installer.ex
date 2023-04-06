@@ -1,5 +1,10 @@
 defmodule PocketBaseInstaller do
   def download_and_run_pocketbase(force \\ false) do
+    # remove zip if exists
+    if File.exists?("pocketbase_*.zip") do
+      File.rm("pocketbase_*.zip")
+    end
+
     if !File.exists?("pocketbase") || force do
       os = :os.type()
       dbg(os)
@@ -32,19 +37,6 @@ defmodule PocketBaseInstaller do
       File.rm("CHANGELOG.md")
       File.rm("LICENSE.md")
       File.rm("pocketbase_*.zip")
-    end
-  end
-
-  defp loop() do
-    receive do
-      {8090, {:data, data}} ->
-        # Output data from the external program
-        IO.binwrite(data)
-        loop()
-
-      {8090, {:exit_status, status}} ->
-        # Exit status from the external program
-        IO.puts("PocketBase exited with status: #{status}")
     end
   end
 end
