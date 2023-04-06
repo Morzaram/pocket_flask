@@ -40,5 +40,3 @@ defmodule PocketBaseInstaller do
     end
   end
 end
-
-PocketBaseInstaller.download_and_run_pocketbase()
