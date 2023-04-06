@@ -7,7 +7,6 @@ defmodule PocketBaseInstaller do
 
     if !File.exists?("pocketbase") || force do
       os = :os.type()
-      dbg(os)
 
       download_url =
         case os do
