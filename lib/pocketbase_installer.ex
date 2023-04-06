@@ -31,11 +31,12 @@ defmodule PocketBaseInstaller do
       System.cmd("wget", [download_url])
 
       # Extract the downloaded zip file
-      System.cmd("unzip", ["pocketbase_*.zip"])
-      File.rm("pocketbase_*.zip")
-      File.rm("CHANGELOG.md")
-      File.rm("LICENSE.md")
-      File.rm("pocketbase_*.zip")
+      # Unzip into pocketbas_install folder
+      System.cmd("unzip", ["pocketbase_*.zip", "-d", "pocketbase_install"])
+      # Move the pocketbase binary to the root folder
+      System.cmd("mv", ["pocketbase_install/pocketbase", "."])
+      # Remove the pocketbase_install folder
+      File.rm_rf("pocketbase_install")
     end
   end
 end
