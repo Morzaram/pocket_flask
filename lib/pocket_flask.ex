@@ -3,12 +3,24 @@ defmodule PocketFlask do
   Documentation for `PocketFlask`.
   """
   alias Options.{CreateOpts, ListOpts, OneOpts, UpdateOpts}
-  defdelegate create(collection_name, data, opts \\ %CreateOpts{}), to: PocketFlask.Create
-  defdelegate create!(collection_name, data, opts \\ %CreateOpts{}), to: PocketFlask.Create
-  defdelegate get_list(collection_name, opts \\ %ListOpts{}), to: PocketFlask.GetList
-  defdelegate get_list!(collection_name, opts \\ %ListOpts{}), to: PocketFlask.GetList
-  defdelegate get_one(collection_name, id, opts \\ %OneOpts{}), to: PocketFlask.GetOne
-  defdelegate get_one!(collection_name, id, opts \\ %OneOpts{}), to: PocketFlask.GetOne
+
+  defdelegate create(collection_name, data, item_struct, opts \\ %CreateOpts{}),
+    to: PocketFlask.Create
+
+  defdelegate create!(collection_name, data, item_struct, opts \\ %CreateOpts{}),
+    to: PocketFlask.Create
+
+  defdelegate get_list(collection_name, item_struct, opts \\ %ListOpts{}), to: PocketFlask.GetList
+
+  defdelegate get_list!(collection_name, item_struct, opts \\ %ListOpts{}),
+    to: PocketFlask.GetList
+
+  defdelegate get_one(collection_name, id, item_struct, opts \\ %OneOpts{}),
+    to: PocketFlask.GetOne
+
+  defdelegate get_one!(collection_name, id, item_struct, opts \\ %OneOpts{}),
+    to: PocketFlask.GetOne
+
   defdelegate update(collection_name, id, data, opts \\ %UpdateOpts{}), to: PocketFlask.Update
   defdelegate update!(collection_name, id, data, opts \\ %UpdateOpts{}), to: PocketFlask.Update
   defdelegate delete(collection_name, id), to: PocketFlask.Delete
@@ -16,6 +28,9 @@ defmodule PocketFlask do
 
   @max_retries Application.compile_env(:pocket_flask, :retry_count)
   @base_url Application.compile_env(:pocket_flask, :rest_url)
+  @auth_method Application.compile_env(:pocket_flask, :auth_method)
+  @email Application.compile_env(:pocket_flask, :email)
+  @password Application.compile_env(:pocket_flask, :password)
   @doc """
   Documentation for `RestUrl`.
   """
@@ -29,6 +44,10 @@ defmodule PocketFlask do
       params: params,
       max_retries: @max_retries
     )
+  end
+
+  def get_token(email, password) do
+    {:ok, token} = PocketFlask.Authenticate.auth_with_password('admins', @email, @password)
   end
 
   @spec purge_unused_params(struct()) :: list()
@@ -55,8 +74,38 @@ defmodule PocketFlask do
     end
   end
 
+  def structure_items(res, item_struct) do
+    res
+    |> Map.replace_lazy(:body, fn body ->
+      case body do
+        %{items: items} -> parse_items(items, item_struct)
+        _ -> body |> parse_body(item_struct)
+      end
+    end)
+  end
+
+  def parse_items(items, struct) do
+    Enum.map(items, fn item -> Nestru.decode_from_map!(item, struct) end)
+  end
+
+  def parse_body(item, struct) do
+    Nestru.decode_from_map!(item, struct)
+  end
+
+  def body_only(res) do
+    Map.get(res, :body)
+  end
+
+  def items_only(res) do
+    case Map.get(res, :body) do
+      %{items: items} -> items
+      _ -> Map.get(res, :body)
+    end
+  end
+
   defp snaked_struct(struct, res) do
-    # dbg()
-    Map.from_struct(res) |> KeyConvert.snake_case() |> Nestru.decode_from_map!(struct)
+    Map.from_struct(res)
+    |> KeyConvert.snake_case()
+    |> Nestru.decode_from_map!(struct)
   end
 end
