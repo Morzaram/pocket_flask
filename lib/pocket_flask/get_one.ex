@@ -28,8 +28,6 @@ defmodule PocketFlask.GetOne do
           {:ok, struct()} | {:error, struct()}
 
   def get_struct_one(collection_name, id, item_struct, opts \\ %OneOpts{}) do
-    dbg(item_struct)
-
     get_one(collection_name, id, opts)
     |> structure_items(item_struct)
   end
