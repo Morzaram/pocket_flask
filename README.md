@@ -46,3 +46,11 @@ In your .env set the pocketbase email and password
 PB_ADMIN_EMAIL="chris.aa.king@gmail.com"
 PB_ADMIN_PASSWORD="chris.aa.king@gmail.com"
 ```
+
+In your .gitignore add the following so it doesn't get commited
+
+```bash
+/pb_data/
+/pb_migrations/
+pocketbase
+```
