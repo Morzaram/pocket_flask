@@ -19,8 +19,25 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/pocket_flask>.
 
-Version 1 - Fetch Only
+Installing Pocketbase
 
-- []
+```bash
+mix deps.get
+iex -S mix
+> PocketBaseInstaller.download_and_run_pocketbase
+```
 
--- continue off of get_list
+In your config.exs add the following
+
+```elixir
+import Config
+
+config :pocket_flask,
+  rest_url: "http://127.0.0.1:8090/api", #your api url
+  cache: true, # Cache responses?
+  retry_count: 0, # Times to retry requests
+  auth_method: :email,
+  email: "your@email.com", #Your auth email
+  password: "yourpassword", #Your auth password
+  token_expiration_time: [14, :days] # This depends on what is set in pocketbase
+```
