@@ -37,7 +37,5 @@ config :pocket_flask,
   cache: true, # Cache responses?
   retry_count: 0, # Times to retry requests
   auth_method: :email,
-  email: "your@email.com", #Your auth email
-  password: "yourpassword", #Your auth password
   token_expiration_time: [14, :days] # This depends on what is set in pocketbase
 ```

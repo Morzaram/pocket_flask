@@ -5,6 +5,4 @@
 #   cache: true,
 #   retry_count: 0,
 #   auth_method: :email,
-#   email: "your@email.com",
-#   password: "yourpassword",
 #   token_expiration_time: [14, :days]

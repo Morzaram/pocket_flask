@@ -40,9 +40,8 @@ defmodule PocketFlask do
 
   @max_retries Application.compile_env(:pocket_flask, :retry_count)
   @base_url Application.compile_env(:pocket_flask, :rest_url)
-  @auth_method Application.compile_env(:pocket_flask, :auth_method)
-  @email Application.compile_env(:pocket_flask, :email)
-  @password Application.compile_env(:pocket_flask, :password)
+  @email System.get_env("PB_ADMIN_EMAIL")
+  @password System.get_env("PB_ADMIN_PASSWORD")
   @doc """
   Documentation for `RestUrl`.
   """
