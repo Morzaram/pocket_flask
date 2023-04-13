@@ -39,3 +39,10 @@ config :pocket_flask,
   auth_method: :email,
   token_expiration_time: [14, :days] # This depends on what is set in pocketbase
 ```
+
+In your .env set the pocketbase email and password
+
+```bash
+PB_ADMIN_EMAIL="chris.aa.king@gmail.com"
+PB_ADMIN_PASSWORD="chris.aa.king@gmail.com"
+```
