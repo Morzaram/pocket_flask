@@ -2,39 +2,31 @@ defmodule PocketFlask do
   @moduledoc """
   Documentation for `PocketFlask`.
   """
-  alias Options.{CreateOpts, ListOpts, OneOpts, UpdateOpts}
 
-  defdelegate create(collection_name, data, item_struct, opts \\ %CreateOpts{}),
-    to: PocketFlask.Create
-
-  defdelegate create!(collection_name, data, item_struct, opts \\ %CreateOpts{}),
-    to: PocketFlask.Create
-
-  defdelegate get_list(collection_name, opts \\ %ListOpts{}), to: PocketFlask.GetList
-
-  defdelegate get_list!(collection_name, opts \\ %ListOpts{}),
-    to: PocketFlask.GetList
-
-  defdelegate get_struct_list(collection_name, item_struct, opts \\ %ListOpts{}),
-    to: PocketFlask.GetList
-
-  defdelegate get_struct_list!(collection_name, item_struct, opts \\ %ListOpts{}),
-    to: PocketFlask.GetList
-
-  defdelegate get_one(collection_name, id, opts \\ %OneOpts{}),
-    to: PocketFlask.GetOne
-
-  defdelegate get_one!(collection_name, id, opts \\ %OneOpts{}),
-    to: PocketFlask.GetOne
-
-  defdelegate get_struct_one(collection_name, id, item_struct, opts \\ %OneOpts{}),
-    to: PocketFlask.GetOne
-
-  defdelegate get_struct_one!(collection_name, id, item_struct, opts \\ %OneOpts{}),
-    to: PocketFlask.GetOne
-
-  defdelegate update(collection_name, id, data, opts \\ %UpdateOpts{}), to: PocketFlask.Update
-  defdelegate update!(collection_name, id, data, opts \\ %UpdateOpts{}), to: PocketFlask.Update
+  defdelegate create(collection_name, data, item_struct, opts), to: PocketFlask.Create
+  defdelegate create(collection_name, data, item_struct), to: PocketFlask.Create
+  defdelegate create!(collection_name, data, item_struct, opts), to: PocketFlask.Create
+  defdelegate create!(collection_name, data, item_struct), to: PocketFlask.Create
+  defdelegate get_list(collection_name, item_struct, opts), to: PocketFlask.GetList
+  defdelegate get_list(collection_name, item_struct), to: PocketFlask.GetList
+  defdelegate get_list!(collection_name, item_struct, opts), to: PocketFlask.GetList
+  defdelegate get_list!(collection_name, item_struct), to: PocketFlask.GetList
+  defdelegate get_struct_list(collection_name, item_struct, opts), to: PocketFlask.GetList
+  defdelegate get_struct_list(collection_name, item_struct), to: PocketFlask.GetList
+  defdelegate get_struct_list!(collection_name, item_struct, opts), to: PocketFlask.GetList
+  defdelegate get_struct_list!(collection_name, item_struct), to: PocketFlask.GetList
+  defdelegate get_one(collection_name, id, item_struct, opts), to: PocketFlask.GetOne
+  defdelegate get_one(collection_name, id, item_struct), to: PocketFlask.GetOne
+  defdelegate get_one!(collection_name, id, opts), to: PocketFlask.GetOne
+  defdelegate get_one!(collection_name, id), to: PocketFlask.GetOne
+  defdelegate get_struct_one(collection_name, id, item_struct, opts), to: PocketFlask.GetOne
+  defdelegate get_struct_one(collection_name, id, item_struct), to: PocketFlask.GetOne
+  defdelegate get_struct_one!(collection_name, id, item_struct, opts), to: PocketFlask.GetOne
+  defdelegate get_struct_one!(collection_name, id, item_struct), to: PocketFlask.GetOne
+  defdelegate update(collection_name, id, data, item_struct, opts), to: PocketFlask.Update
+  defdelegate update(collection_name, id, data, item_struct), to: PocketFlask.Update
+  defdelegate update!(collection_name, id, data, item_struct, opts), to: PocketFlask.Update
+  defdelegate update!(collection_name, id, data, item_struct), to: PocketFlask.Update
   defdelegate delete(collection_name, id), to: PocketFlask.Delete
   defdelegate delete!(collection_name, id), to: PocketFlask.Delete
 
@@ -48,35 +40,40 @@ defmodule PocketFlask do
 
   @spec rest_req(map()) :: Req.Request.t()
   def rest_req(params \\ %{}) do
-    params =
-      cond do
-        is_struct(params) -> Map.from_struct(params)
-        true -> params
-      end
-
-    {form, params} = Map.split(params, [:filter])
+    {form, params} =
+      prepare_params(params)
+      |> Map.split([:filter])
 
     Req.new(
       base_url: "#{@base_url}/collections/",
-      form: form,
       params: params,
       max_retries: @max_retries
     )
   end
 
+  @spec get_token(String.t(), String.t()) :: any()
   def get_token(email, password) do
-    {:ok, token} = PocketFlask.Authenticate.auth_with_password('admins', @email, @password)
+    {:ok, token} = PocketFlask.Authenticate.auth_with_password(~c"admins", email, password)
   end
 
-  @spec purge_unused_params(struct()) :: list()
-  def purge_unused_params(opts) do
-    opts
-    |> Map.from_struct()
+  @doc """
+  Takes incoming stuct and converts it into query parameters
+  """
+  @spec prepare_params(map()) :: map()
+  def prepare_params(params) do
+    cond do
+      is_struct(params) -> Map.from_struct(params)
+      is_map(params) && !is_struct(params) -> params
+    end
     |> KeyConvert.camelize()
     |> Enum.filter(fn {_, v} -> v != nil end)
+    |> Enum.into(%{})
   end
 
-  def handle_response(res, struct) when is_tuple(res) do
+  @doc """
+  This handles non '!' responses from the Pocketbase requests
+  """
+  def format_response(res, struct) when is_tuple(res) do
     case res do
       {:ok, %{status: 200} = res} -> {:ok, snaked_struct(struct, res)}
       {:ok, %{status: 204} = res} -> {:ok, snaked_struct(struct, res)}
@@ -85,35 +82,50 @@ defmodule PocketFlask do
     end
   end
 
-  def handle_response(res, struct) when is_struct(res) do
+  @doc """
+  This handles '!' responses from the Pocketbase requests
+  """
+  def format_response(res, struct) when is_struct(res) do
     case res do
       %{status: 200} = res -> snaked_struct(struct, res)
-      res -> struct(Res.ErrorRes, Map.from_struct(res))
+      res when is_struct(res) -> struct(Res.ErrorRes, Map.from_struct(res))
     end
   end
 
-  @spec structure_items(tuple(), struct()) :: tuple()
-  def structure_items({status, res}, item_struct) do
-    {status, structure_items(res, item_struct)}
+  @doc """
+  This function is used to handle structuring an error response.
+  """
+
+  @spec convert_to_structs(%Res.ErrorRes{}, any) :: %Res.ErrorRes{}
+  def convert_to_structs(%Res.ErrorRes{} = res, item_struct) do
+    res
   end
 
-  @spec structure_items(struct(), any) :: struct()
-  def structure_items(res, item_struct) do
+  @doc """
+  This function is used to handle structuring a non-error and non '!' response.
+  """
+
+  @spec convert_to_structs(tuple(), struct()) :: tuple()
+  def convert_to_structs({status, res}, item_struct) do
+    {status, convert_to_structs(res, item_struct)}
+  end
+
+  @doc """
+  This function is used to handle structuring a non-error and '!' response.
+  """
+  @spec convert_to_structs(struct(), any) :: struct()
+  def convert_to_structs(res, item_struct) do
     res
     |> Map.replace_lazy(:body, fn body ->
       case body do
-        %{items: items} -> parse_items(items, item_struct)
-        _ -> body |> parse_body(item_struct)
+        %{items: items} -> Map.put(body, :items, parse_items(items, item_struct))
+        _ -> Nestru.decode_from_map!(body, item_struct)
       end
     end)
   end
 
   def parse_items(items, struct) do
     Enum.map(items, fn item -> Nestru.decode_from_map!(item, struct) end)
-  end
-
-  def parse_body(item, struct) do
-    Nestru.decode_from_map!(item, struct)
   end
 
   def body_only(res) do

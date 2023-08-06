@@ -1,8 +1,9 @@
 defmodule DeleteTest do
   use ExUnit.Case, async: true
+  import PocketFlask.TestHelper
 
   setup do
-    [record_id: create_record()["id"]]
+    [record_id: create_record().id]
   end
 
   test "delete/2 works", context do
@@ -15,10 +16,5 @@ defmodule DeleteTest do
     res = PocketFlask.delete!("posts", context[:record_id])
     assert res.status == 204
     assert res.body == ""
-  end
-
-  def create_record do
-    res = PocketFlask.create!("posts", %{title: "Test Post"})
-    res.body
   end
 end

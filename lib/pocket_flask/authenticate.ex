@@ -7,7 +7,7 @@ defmodule PocketFlask.Authenticate do
 
     rest_req()
     |> Req.post!(url: url, json: %{email: email, password: password})
-    |> handle_response(Res.AuthWithPasswordRes)
+    |> format_response(Res.AuthWithPasswordRes)
   end
 
   # def validate_token(collection_name, token) do
@@ -15,6 +15,6 @@ defmodule PocketFlask.Authenticate do
 
   #   rest_req()
   #   |> Req.post!(url: url, json: %{email: email, password: password})
-  #   |> handle_response(Res.AuthWithPasswordRes)
+  #   |> format_response(Res.AuthWithPasswordRes)
   # end
 end

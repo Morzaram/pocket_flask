@@ -6,11 +6,11 @@ defmodule PocketFlask.Delete do
 
   @spec delete(String.t(), String.t()) :: {:ok, struct()} | {:error, struct()}
   def delete(collection_name, id) do
-    rest_req() |> Req.delete(url: url(collection_name, id)) |> handle_response(Res.DeleteRes)
+    rest_req() |> Req.delete(url: url(collection_name, id)) |> format_response(Res.DeleteRes)
   end
 
   @spec delete!(String.t(), String.t()) :: {:ok, struct()} | {:error, struct()}
   def delete!(collection_name, id) do
-    rest_req() |> Req.delete!(url: url(collection_name, id)) |> handle_response(Res.DeleteRes)
+    rest_req() |> Req.delete!(url: url(collection_name, id)) |> format_response(Res.DeleteRes)
   end
 end

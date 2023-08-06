@@ -7,17 +7,19 @@ defmodule PocketFlask.Update do
 
   @spec update(String.t(), String.t(), map(), UpdateOpts.t()) ::
           {:ok, struct()} | {:error, struct()}
-  def update(collection_name, id, data, opts \\ %UpdateOpts{}) do
+  def update(collection_name, id, data, item_struct, opts \\ %UpdateOpts{}) do
     rest_req(opts)
     |> Req.patch(url: url(collection_name, id), json: data)
-    |> handle_response(Res.UpdateRes)
+    |> format_response(Res.UpdateRes)
+    |> convert_to_structs(item_struct)
   end
 
   @spec update!(String.t(), String.t(), map(), UpdateOpts.t()) ::
           {:ok, struct()} | {:error, struct()}
-  def update!(collection_name, id, data, opts \\ %UpdateOpts{}) do
+  def update!(collection_name, id, data, item_struct, opts \\ %UpdateOpts{}) do
     rest_req(opts)
     |> Req.patch!(url: url(collection_name, id), json: data)
-    |> handle_response(Res.UpdateRes)
+    |> format_response(Res.UpdateRes)
+    |> convert_to_structs(item_struct)
   end
 end

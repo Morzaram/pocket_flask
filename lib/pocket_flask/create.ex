@@ -10,8 +10,8 @@ defmodule PocketFlask.Create do
   def create(collection_name, data, item_struct, opts \\ %CreateOpts{}) do
     rest_req(opts)
     |> Req.post(url: url(collection_name), json: data)
-    |> handle_response(Res.CreateRes)
-    |> structure_items(item_struct)
+    |> format_response(Res.CreateRes)
+    |> convert_to_structs(item_struct)
   end
 
   @spec create!(String.t(), map(), struct(), CreateOpts.t()) ::
@@ -19,7 +19,7 @@ defmodule PocketFlask.Create do
   def create!(collection_name, data, item_struct, opts \\ %CreateOpts{}) do
     rest_req(opts)
     |> Req.post!(url: url(collection_name), json: data)
-    |> handle_response(Res.CreateRes)
-    |> structure_items(item_struct)
+    |> format_response(Res.CreateRes)
+    |> convert_to_structs(item_struct)
   end
 end
