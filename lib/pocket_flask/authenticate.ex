@@ -3,18 +3,26 @@ defmodule PocketFlask.Authenticate do
   import PocketFlask
 
   def auth_with_password(collection_name, email, password) do
-    url = "/api/collections/#{collection_name}/auth-with-password"
+    url = "/#{collection_name}/auth-with-password"
 
-    rest_req()
-    |> Req.post!(url: url, json: %{email: email, password: password})
+    base_req()
+    |> Req.post!(url: url, json: %{identity: email, password: password})
     |> format_response(Res.AuthWithPasswordRes)
   end
 
-  # def validate_token(collection_name, token) do
-  #   url = "/api/collections/#{collection_name}/confirm-verification"
+  def get_token(response) do
+    case response do
+      {:ok, %{body: %{"token" => token}}} -> token
+      %{body: %{"token" => token}} -> token
+      {:error, err} -> err
+    end
+  end
 
-  #   rest_req()
-  #   |> Req.post!(url: url, json: %{email: email, password: password})
-  #   |> format_response(Res.AuthWithPasswordRes)
-  # end
+  defp base_req(params \\ %{}) do
+    Req.new(
+      base_url: "#{Constants.base_url()}",
+      params: params,
+      max_retries: Constants.max_retries()
+    )
+  end
 end

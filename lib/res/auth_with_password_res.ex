@@ -29,15 +29,33 @@ defmodule Res.AuthRecord do
         }
 end
 
-defmodule Res.AuthWithPasswordRes do
-  @derive {Nestru.Decoder, hint: %{record: Res.AuthRecord}}
+defmodule Res.TokenAndAdmin do
+  @derive {Nestru.Decoder, hint: %{admin: Res.AuthRecord}}
   defstruct [
     :token,
-    :record
+    :admin
   ]
 
   @type t :: %__MODULE__{
           token: String.t(),
-          record: Res.AuthRecord.t()
+          admin: Res.AuthRecord.t()
+        }
+end
+
+defmodule Res.AuthWithPasswordRes do
+  @derive Nestru.Decoder
+
+  defstruct [
+    :status,
+    :headers,
+    :body,
+    :private
+  ]
+
+  @type t :: %__MODULE__{
+          status: integer(),
+          headers: [{String.t(), String.t()}],
+          body: Res.TokenAndAdmin.t(),
+          private: map()
         }
 end

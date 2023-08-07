@@ -23,7 +23,9 @@ defmodule PocketFlask.MixProject do
     [
       {:req, "~> 0.3"},
       {:nestru, "~> 0.3.2"},
-      {:key_convert, "~> 0.5.0"}
+      {:key_convert, "~> 0.5.0"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:credo_envvar, "~> 0.1.4", only: [:dev, :test], runtime: false}
     ]
   end
 end

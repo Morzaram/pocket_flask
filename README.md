@@ -37,7 +37,7 @@ config :pocket_flask,
   cache: true, # Cache responses?
   retry_count: 0, # Times to retry requests
   auth_method: :email,
-  token_expiration_time: [14, :days] # This depends on what is set in pocketbase
+  token_refresh_interval: 1209600 # This depends on what is set in pocketbase
 ```
 
 In your .env set the pocketbase email and password
@@ -54,3 +54,5 @@ In your .gitignore add the following so it doesn't get commited
 /pb_migrations/
 pocketbase
 ```
+
+implement authorization genserver

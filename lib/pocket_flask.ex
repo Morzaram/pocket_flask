@@ -30,10 +30,6 @@ defmodule PocketFlask do
   defdelegate delete(collection_name, id), to: PocketFlask.Delete
   defdelegate delete!(collection_name, id), to: PocketFlask.Delete
 
-  @max_retries Application.compile_env(:pocket_flask, :retry_count)
-  @base_url Application.compile_env(:pocket_flask, :rest_url)
-  @email System.get_env("PB_ADMIN_EMAIL")
-  @password System.get_env("PB_ADMIN_PASSWORD")
   @doc """
   Documentation for `RestUrl`.
   """
@@ -45,9 +41,9 @@ defmodule PocketFlask do
       |> Map.split([:filter])
 
     Req.new(
-      base_url: "#{@base_url}/collections/",
+      base_url: "#{Constants.base_url()}/collections/",
       params: params,
-      max_retries: @max_retries
+      max_retries: Constants.max_retries()
     )
   end
 

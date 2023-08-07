@@ -2,7 +2,7 @@ defmodule PocketFlask.GetList do
   alias Options.ListOpts
   import PocketFlask, only: [rest_req: 1, format_response: 2, convert_to_structs: 2]
 
-  @cache Application.compile_env(:pocket_flask, :retry_count)
+  @cache Application.compile_env(:pocket_flask, :cache)
   @spec url(String.t()) :: <<_::64, _::_*8>>
   def url(collection), do: "#{collection}/records"
 
